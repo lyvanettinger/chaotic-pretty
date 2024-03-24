@@ -1,11 +1,12 @@
 #include "core/device.hpp"
 
+#include <cassert>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include "rendering/open_gl.h"
+
 #include <stdlib.h>
 #include <stdio.h>
-#include <cassert>
-
-//#define FULL_SCREEN
-//#define WINDOWED_FULL_SCREEN
 
 using namespace chap;
 
@@ -43,30 +44,42 @@ Device::Device()
 	glfwSetErrorCallback(ErrorCallback);
 
 	// set window hints
-	glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE); // we prefer double buffering
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // since we're only working with vulkan, no context is needed
+	//glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE); // we prefer double buffering
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// create window according to preference
-#ifdef FULL_SCREEN
-	// set monitor
-	monitor = glfwGetPrimaryMonitor();
-	window = glfwCreateWindow(640, 480, "chaotic pretty", monitor, NULL);
-#elif WINDOWED_FULL_SCREEN
-	monitor = glfwGetPrimaryMonitor();
-	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-	glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-	glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+	m_monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(m_monitor);
 
-	GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "chaotic pretty", monitor, NULL);
-#else
-	m_window = glfwCreateWindow(1920, 1080, "chaotic pretty", m_monitor, NULL);
-#endif
+	auto monitorScreenWidth = mode->width;
+	auto monitorScreenHeight = mode->height;
+
+	if (m_fullscreen)
+	{
+		m_width = monitorScreenWidth;
+		m_height = monitorScreenHeight;
+		m_window = glfwCreateWindow(m_width, m_height, "chaotic pretty", m_monitor, nullptr);
+	}
+	else
+	{
+		m_window = glfwCreateWindow(m_width, m_height, "chaotic pretty", nullptr, nullptr);
+	}
+
 	if (!m_window)
 	{
 		fprintf(stderr, "Failed to create GLFW window\n");
 		glfwTerminate();
+		assert(false);
+		exit(EXIT_FAILURE);
+	}
+
+	glfwMakeContextCurrent(m_window);
+
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		fprintf(stderr, "Failed to initialize GLAD\n");
+		assert(false);
 		exit(EXIT_FAILURE);
 	}
 
@@ -76,8 +89,6 @@ Device::Device()
 	glfwSetKeyCallback(m_window, KeyCallback);
 
 	glfwSetTime(0.0);
-
-	assert(success);
 }
 
 Device::~Device()
@@ -91,12 +102,12 @@ void Device::Update()
 	glfwPollEvents();
 }
 
-void* Device::GetWindow()
-{
-	return m_window;
-}
-
 bool Device::ShouldClose()
 {
 	return glfwWindowShouldClose(m_window);
+}
+
+void Device::CloseWindow()
+{
+	glfwSetWindowShouldClose(m_window, GLFW_TRUE);
 }

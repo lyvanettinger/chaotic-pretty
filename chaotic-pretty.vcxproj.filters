@@ -4,9 +4,23 @@
     <ClCompile Include="source\game\chaotic-pretty.cpp" />
     <ClCompile Include="source\rendering\renderer.cpp" />
     <ClCompile Include="source\core\device.cpp" />
+    <ClCompile Include="source\game\game.cpp" />
+    <ClCompile Include="external\glad\src\glad.c" />
+    <ClCompile Include="source\core\resource_manager.cpp" />
+    <ClCompile Include="source\core\shader.cpp" />
+    <ClCompile Include="source\core\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\rendering\renderer.hpp" />
     <ClInclude Include="include\core\device.hpp" />
+    <ClInclude Include="include\game\game.hpp" />
+    <ClInclude Include="include\rendering\open_gl.h" />
+    <ClInclude Include="include\core\resource_manager.hpp" />
+    <ClInclude Include="include\core\shader.hpp" />
+    <ClInclude Include="include\core\texture.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\sprite.vert" />
+    <None Include="assets\shaders\sprite.frag" />
   </ItemGroup>
 </Project>

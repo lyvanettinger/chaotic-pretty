@@ -10,6 +10,7 @@ int main()
 
 	while (!device->ShouldClose())
 	{
+		renderer->Render();
 		device->Update();
 	}
 
